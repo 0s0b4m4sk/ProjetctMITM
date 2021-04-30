@@ -83,7 +83,9 @@ if user_choice1 == "1":
 	
 		targetMac=recup_mac_adress(scan_mac)
 
-		attaque()
+		Thread(target=attaque).start()
+		time.sleep(5)
+		Thread(target=dns_spoof).start()
 	
 
 
