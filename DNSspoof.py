@@ -8,10 +8,12 @@ import mariadb
 
 
 dns_hosts = {
+"""
     b"www.google.com.": "192.168.0.30",
     b"google.com.": "192.168.0.30",
     b"www.facebook.com.": "192.168.0.30",
     b"www.webscantest.com.":"192.168.0.30"
+"""
 }
 
 def recup_packet(packet):

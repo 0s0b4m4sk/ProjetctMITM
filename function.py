@@ -46,10 +46,30 @@ def recup_dns():
 
 	return list_dns
 
+def recup_http():
+	today = date.today()
+	dateinfo = today.strftime("%d %B %y")
+	list_HTTP = []
+	file = open("http.txt",'r')
+	line = file.readlines()
+
+	for lines in line:
+		request = lines
+		request = request.split(",")
+		url = request[0]
+		method = request[1]
+		method = method[0:]
+		
+		list_HTTP.append(dateinfo)
+		list_HTTP.append(url)
+		list_HTTP.append(method)	
+	file.close()
+
+	return list_HTTP
+	
 
 
-
-def insert_data(list_plage_ip, data_ip_active, list_dns):
+def insert_data(ip,list_plage_ip, data_ip_active,list_dns, list_HTTP):
 	it1 = iter(list_plage_ip)
 	tuple_plage_ip = zip(it1, it1)
 	tuple_plage_ip = list(tuple_plage_ip)
@@ -65,32 +85,50 @@ def insert_data(list_plage_ip, data_ip_active, list_dns):
 	tuple_requete_dns = list(tuple_requete_dns)
 	print(tuple_requete_dns)
 
+	it4=iter(list_HTTP)
+	tuple_requete_HTTP= zip(it4,it4,it4)
+	tuple_requete_HTTP = list(tuple_requete_HTTP)
+
 
 	mycursor = mydb.cursor()
 
-	Q1 = "CREATE TABLE IF NOT EXISTS Plage_ip(id_plageIP INT AUTO_INCREMENT PRIMARY KEY, Ip VARCHAR(18) NOT NULL, date VARCHAR(18) NOT NULL)"
-	Q2 = "CREATE TABLE IF NOT EXISTS Ip_active(id_active INT AUTO_INCREMENT PRIMARY KEY, Ip_active VARCHAR(18) NOT NULL, date VARCHAR(14) NOT NULL, Adresse_mac VARCHAR(18) NOT NULL, plage_ip INT NOT NULL, FOREIGN KEY(plage_ip) REFERENCES Plage_ip(id_plageIP))"
+	Q1= "CREATE TABLE IF NOT EXISTS Plage_ip(id_plageIP INT AUTO_INCREMENT PRIMARY KEY, Ip VARCHAR(18) NOT NULL, date VARCHAR(18) NOT NULL)"
+	Q2= "CREATE TABLE IF NOT EXISTS Ip_active(id_active INT AUTO_INCREMENT PRIMARY KEY, Ip_active VARCHAR(18) NOT NULL, date VARCHAR(14) NOT NULL, Adresse_mac VARCHAR(18) NOT NULL, plage_ip INT NOT NULL, FOREIGN KEY(plage_ip) REFERENCES Plage_ip(id_plageIP))"
 	Q3= "CREATE TABLE IF NOT EXISTS DNS_Request(id_dns INT AUTO_INCREMENT PRIMARY KEY, date VARCHAR(14) NOT NULL, DNS_query VARCHAR(50) NOT NULL, adresse_ip INT NOT NULL, FOREIGN KEY(adresse_ip) REFERENCES Ip_active(id_active))"
+	Q4= "CREATE TABLE IF NOT EXISTS HTTP_Request(id_request INT AUTO_INCREMENT PRIMARY KEY, date VARCHAR(14) NOT NULL, url LONGTEXT NOT NULL ,method VARCHAR(50) NOT NULL , adresse_ip INT NOT NULL, FOREIGN KEY(adresse_ip) REFERENCES Ip_active(id_active)) "
 
-	Q4 = "INSERT INTO Ip_active(date,Ip_active,Adresse_mac,plage_ip) VALUES(%s, %s, %s,%s)"
-	Q5 = "INSERT INTO DNS_Request(date, DNS_query,adresse_ip) VALUES (%s,%s,%s)"
+
+	Q5= "INSERT INTO Ip_active(date,Ip_active,Adresse_mac,plage_ip) VALUES(%s,%s,%s,%s)"
+	Q6= "INSERT INTO DNS_Request(date, DNS_query,adresse_ip) VALUES (%s,%s,%s)"
+	Q7= "INSERT INTO HTTP_Request(date,url,method,adresse_ip) VALUES (%s,%s,%s,%s)"
 
 	mycursor.execute(Q1)
 	mycursor.execute(Q2)
 	mycursor.execute(Q3)
+	mycursor.execute(Q4)
 
 
-	Q1="INSERT INTO Ip_active(date,Ip_active,Adresse_mac,plage_ip) VALUES(%s, %s, %s,%s)"
-	Q2="INSERT INTO DNS_Request(date, DNS_query,adresse_ip) VALUES (%s,%s,%s)"
-
-	mycursor.executemany("INSERT INTO Plage_ip (Ip, date) VALUES(%s, %s)",tuple_plage_ip)
+	mycursor.executemany("INSERT INTO Plage_ip(Ip, date) VALUES(%s, %s)",tuple_plage_ip)
 	last_id = mycursor.lastrowid
 
 	for x in tuple_ip_active:
-		mycursor.execute(Q4,x+(last_id,))
+		mycursor.execute(Q5,x+(last_id,))
+
+	time.sleep(10)
+
+	mycursor.execute("SELECT id_active FROM Ip_active where Ip_active LIKE ? AND plage_ip LIKE ?", ('%'+ ip + '%','%',last_id,'%'))
+
+	for x in mycursor:
+		num_id = x[0]
+		print(num_id)
+
+	new_last_id = mycursor.lastrowid
 
 	for y in tuple_requete_dns : 
-		mycursor.execute(Q5,y+(last_id,)) 
+		mycursor.execute(Q6,y+(num_id,)) 
+
+	for z in tuple_requete_HTTP :
+		mycursor.execute(Q7,z+(num_id,)) 
 
 	mydb.commit()
 
@@ -180,9 +218,11 @@ def list_ip():
 	return list_ip
 	
 dns_hosts = {
+"""
     b"www.google.com": "192.168.1.20",
     b"google.com": "192.168.1.20",
     b"www.facebook.com": "192.168.1.20"
+ """
 }
 
 

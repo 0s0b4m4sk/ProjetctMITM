@@ -92,7 +92,8 @@ if user_choice1 == "1":
 		print("\nNous allons stopper l'attaque Man in the middle")
 		stop = reARP(target_ip,routerIP, routerMac, targetMac)
 		list_dns_request = recup_dns()
-		insert_data(data_plageIP,data_ip_active,list_dns_request)
+		list_request_http = recup_http()
+		insert_data(target_ip,data_plageIP,data_ip_active,list_dns_request,list_request_http)
 
 elif user_choice1 == "2":
 
