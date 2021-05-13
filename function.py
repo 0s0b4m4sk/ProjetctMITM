@@ -58,7 +58,7 @@ def recup_http():
 		request = request.split(",")
 		url = request[0]
 		method = request[1]
-		method = method[0:]
+		method = method[0:-1]
 		
 		list_HTTP.append(dateinfo)
 		list_HTTP.append(url)
@@ -73,21 +73,23 @@ def insert_data(ip,list_plage_ip, data_ip_active,list_dns, list_HTTP):
 	it1 = iter(list_plage_ip)
 	tuple_plage_ip = zip(it1, it1)
 	tuple_plage_ip = list(tuple_plage_ip)
-	print(tuple_plage_ip)
+	
+	
 
 	it2 = iter(data_ip_active)
 	tuple_ip_active = zip(it2, it2, it2)
 	tuple_ip_active = list(tuple_ip_active)
-	print(tuple_ip_active)
+	
 
 	it3=iter(list_dns)
 	tuple_requete_dns= zip(it3, it3)
 	tuple_requete_dns = list(tuple_requete_dns)
-	print(tuple_requete_dns)
+	
 
 	it4=iter(list_HTTP)
 	tuple_requete_HTTP= zip(it4,it4,it4)
 	tuple_requete_HTTP = list(tuple_requete_HTTP)
+	print(tuple_requete_dns)
 
 
 	mycursor = mydb.cursor()
@@ -131,6 +133,10 @@ def insert_data(ip,list_plage_ip, data_ip_active,list_dns, list_HTTP):
 		mycursor.execute(Q7,z+(num_id,)) 
 
 	mydb.commit()
+
+	os.remove("dns.txt")
+	os.remove("http.txt")
+
 
 	
 def add_plage_ip(data):
